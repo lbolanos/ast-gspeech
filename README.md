@@ -1,5 +1,5 @@
 # ast-gspeech
-Asterisk Connection with google speech API
+Asterisk Connection with Google Cloud Speech API
 
 You have to follow the instructions to get google speech api working
 
