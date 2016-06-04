@@ -236,5 +236,10 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 	@Override
 	public void service(AgiRequest request, AgiChannel channel) throws AgiException {
 		logger.debug("service '" + request + "' " + channel);
+		try {
+			this.recognize();
+		} catch (InterruptedException | IOException e) {
+			e.printStackTrace( System.err );
+		}
 	}
 }
