@@ -53,11 +53,12 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 
 	private static final List<String> OAUTH2_SCOPES = Arrays.asList("https://www.googleapis.com/auth/cloud-platform");
 	
-	public abstract boolean onNext( String transcript, RecognizeResponse response );
+	public abstract boolean onNext( String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult, RecognizeResponse response );
+	public abstract boolean onFinal( String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult, RecognizeResponse response );
 	
 	public abstract void onError(Throwable error);
 		
-	public abstract boolean onEvent(EndpointerEvent endpoint);
+	public abstract boolean onEvent(EndpointerEvent endpoint);	
 	
 	public abstract void onCompleted(); 
 	
@@ -103,16 +104,20 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 						return;
 					}
 				}
-				for (SpeechRecognitionResult speechRecognitionResult : response.getResultsList()) {					
-					if( speechRecognitionResult.getIsFinal() ) {
-						for (SpeechRecognitionAlternative speechRecognitionAlternative : speechRecognitionResult.getAlternativesList()) {
-							String transcript = speechRecognitionAlternative.getTranscript();
-							boolean continueRet = script.onNext(transcript, response );
-							if( !continueRet ) {
-								infinite.setInfinite( false );
-								break;
-							}
-						}						
+				for (SpeechRecognitionResult speechRecognitionResult : response.getResultsList()) {
+					boolean isFinal = speechRecognitionResult.getIsFinal(); 
+					for (SpeechRecognitionAlternative speechRecognitionAlternative : speechRecognitionResult.getAlternativesList()) {
+						String transcript = speechRecognitionAlternative.getTranscript();
+						boolean continueRet = true;
+						if( isFinal ) {
+							continueRet = script.onFinal( transcript, speechRecognitionAlternative.getConfidence(), speechRecognitionResult, response );
+						} else {
+							continueRet = script.onNext( transcript, speechRecognitionAlternative.getConfidence(), speechRecognitionResult, response );
+						}
+						if( !continueRet ) {
+							infinite.setInfinite( false );
+							break;
+						}
 					}
 				}
 			}
