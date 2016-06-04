@@ -11,6 +11,8 @@ import com.google.cloud.speech.v1.SpeechRecognitionResult;
 
 public class HelloWorld extends BaseAgiRecoScript {
 
+	private String lastTranscript = "";
+
 	@Override
 	public void service(AgiRequest request, AgiChannel channel) throws AgiException {
 		answer();
@@ -40,14 +42,20 @@ public class HelloWorld extends BaseAgiRecoScript {
 	public boolean onEvent(EndpointerEvent endpoint) {
 		switch( endpoint.getNumber() ) {
 			case EndpointerEvent.END_OF_SPEECH_VALUE:				
+				if( lastTranscript.length() > 30 ) {
 				return false;
 		}
+		return true;
+	}
 		return true;
 	}
 
 	@Override
 	public boolean onNext(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
 			RecognizeResponse response) {
+		if( confidence > 0.8 ) {
+			lastTranscript = transcript;
+		}
 		try {
 			setVariable( "transcript" ,transcript );
 		} catch (AgiException e) {

@@ -19,7 +19,6 @@ import org.asteriskjava.util.Log;
 import org.asteriskjava.util.LogFactory;
 
 import com.astgspeech.core.BaseEAgiScript;
-import com.astgspeech.core.EAgiOperations;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.AudioRequest;
 import com.google.cloud.speech.v1.InitialRecognizeRequest;
@@ -42,7 +41,7 @@ import io.grpc.stub.StreamObserver;
 
 public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private final Log logger = LogFactory.getLog(BaseAgiRecoScript.class);
 	
 	private final ManagedChannel channelGRPC;
 
@@ -76,7 +75,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 		channelGRPC = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS)
 				.intercept(new ClientAuthInterceptor(creds, Executors.newSingleThreadExecutor())).build();
 		stub = SpeechGrpc.newStub(channelGRPC);
-		System.err.println("Created stub for " + host + ":" + port);
+		logger.info("Created stub for " + host + ":" + port);		
 	}
 	
 
@@ -100,7 +99,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 		StreamObserver<RecognizeResponse> responseObserver = new StreamObserver<RecognizeResponse>() {
 			@Override
 			public void onNext(RecognizeResponse response) {
-				System.err.println("Received response: " + TextFormat.printToString(response));
+				logger.info("Received response: " + TextFormat.printToString(response));
 				EndpointerEvent endpoint = response.getEndpoint();
 				if( endpoint != null ) {
 					boolean continueRet = script.onEvent( endpoint );
@@ -130,14 +129,14 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 			@Override
 			public void onError(Throwable error) {
 				Status status = Status.fromThrowable(error);
-				System.err.println("recognize failed: {0}" + status);
+				logger.error("recognize failed: {0}" + status);
 				finishLatch.countDown();
 				script.onError(error);
 			}
 
 			@Override
 			public void onCompleted() {
-				System.err.println("recognize completed.");
+				logger.info("recognize completed.");
 				finishLatch.countDown();
 				script.onCompleted();
 			}
@@ -183,7 +182,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 						now = new Date();
 						long timeNow = now.getTime();
 						long elapsed = timeNow - before.getTime();					
-						System.err.println("Sent " + bytesRead + " elapsed:" + elapsed + " msec:" + timeNow );
+						logger.debug("Sent " + bytesRead + " elapsed:" + elapsed + " msec:" + timeNow );
 						before = now;
 						if( elapsed < 180 ) {
 							//continue;
@@ -207,21 +206,21 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 						now = new Date();
 						long timeNow = now.getTime();
 						long elapsed = timeNow - before.getTime();					
-						System.err.println("No DATA elapsed:" + elapsed + " msec:" + timeNow );
+						logger.info("No DATA elapsed:" + elapsed + " msec:" + timeNow );
 						if( elapsed > 3000 ) {
 							break;
 						}
 					}
 					
 				} catch ( EOFException eof ) {
-					System.err.println("EOF " + totalBytes );
+					logger.info("EOF " + totalBytes );
 					break;
 				} catch ( AgiException aexc ){
-					System.err.println("AgiException " + totalBytes );
+					logger.info("AgiException " + totalBytes );
 					break;
 				}
 			}
-			System.err.println("Sent " + totalBytes + " bytes from audio file: ");
+			logger.info("Sent " + totalBytes + " bytes from audio file: ");
 		} catch (RuntimeException e) {
 			// Cancel RPC.
 			requestObserver.onError(e);
@@ -237,7 +236,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 	@Override
 	public void service(AgiRequest request, AgiChannel channel) throws AgiException {
 		this.setChannel( channel );
-		logger.debug("service '" + request + "' " + channel);
+		logger.debug("service '" + request + "' ");
 		try {
 			this.recognize();
 		} catch (InterruptedException | IOException e) {
