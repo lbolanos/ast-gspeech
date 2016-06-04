@@ -51,11 +51,20 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 	@Override
 	public boolean onNext(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
 			RecognizeResponse response) {
+		try{
 		if( confidence > 0.8 ) {
 			lastTranscript = transcript;
 		}
-		try {
 			setVariable( "transcript" ,transcript );
+			if( transcript.contains("mensaje después del tono" ) ) {
+				setVariable( "MACHINE" ,"TRUE" );
+				hangup();				
+				return false;
+			}
+			if( transcript.contains("aló" ) ) {
+				setVariable( "MACHINE" ,"FALSE" );
+				return false;
+			}
 		} catch (AgiException e) {
 			e.printStackTrace(System.err);
 		}
