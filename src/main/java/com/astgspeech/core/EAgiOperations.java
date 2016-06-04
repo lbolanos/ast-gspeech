@@ -16,7 +16,7 @@ import org.asteriskjava.fastagi.reply.AgiReply;
  */
 public class EAgiOperations implements AgiChannel
 {
-    private final AgiChannel channel;
+    private AgiChannel channel;
 
     /**
      * Creates a new instance that operates on the channel attached to the
@@ -61,6 +61,11 @@ public class EAgiOperations implements AgiChannel
         }
 
         return threadBoundChannel;
+    }
+    
+    protected void  setChannel(AgiChannel channel )
+    {
+        this.channel = channel;
     }
 
     /* The following methods simply delegate to #getChannel() */

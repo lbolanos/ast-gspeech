@@ -19,6 +19,7 @@ import org.asteriskjava.util.Log;
 import org.asteriskjava.util.LogFactory;
 
 import com.astgspeech.core.BaseEAgiScript;
+import com.astgspeech.core.EAgiOperations;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.AudioRequest;
 import com.google.cloud.speech.v1.InitialRecognizeRequest;
@@ -43,7 +44,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 
 	private final Log logger = LogFactory.getLog(getClass());
 	
-	private final ManagedChannel channel;
+	private final ManagedChannel channelGRPC;
 
 	private final SpeechGrpc.SpeechStub stub;
 
@@ -72,9 +73,9 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 			throw new RuntimeException ( e );
 		}
 		creds = creds.createScoped(OAUTH2_SCOPES);
-		channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS)
+		channelGRPC = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS)
 				.intercept(new ClientAuthInterceptor(creds, Executors.newSingleThreadExecutor())).build();
-		stub = SpeechGrpc.newStub(channel);
+		stub = SpeechGrpc.newStub(channelGRPC);
 		System.err.println("Created stub for " + host + ":" + port);
 	}
 	
@@ -88,7 +89,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 	}
 
 	public void shutdown() throws InterruptedException {
-		channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+		channelGRPC.shutdown().awaitTermination(5, TimeUnit.SECONDS);
 	}
 
 	/** Send streaming recognize requests to server. */
@@ -235,6 +236,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 
 	@Override
 	public void service(AgiRequest request, AgiChannel channel) throws AgiException {
+		this.setChannel( channel );
 		logger.debug("service '" + request + "' " + channel);
 		try {
 			this.recognize();
