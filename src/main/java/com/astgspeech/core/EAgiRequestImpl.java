@@ -67,6 +67,9 @@ public class EAgiRequestImpl implements AgiRequest {
         this.request = request;
 
         script = request.get("network_script");
+        if (script == null){
+        	script = request.get("arg_1");
+        }
         if (script != null)
         {
             Matcher scriptMatcher = SCRIPT_PATTERN.matcher(script);
