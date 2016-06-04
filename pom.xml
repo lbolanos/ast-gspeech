@@ -16,8 +16,8 @@ limitations under the License.
 <project>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.astexample</groupId>
-  <artifactId>astexample</artifactId>
+  <groupId>com.astgspeech</groupId>
+  <artifactId>astgspeech</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 

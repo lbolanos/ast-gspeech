@@ -1,4 +1,4 @@
-package com.astexample;
+package com.astgspeech;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -23,7 +23,6 @@ import org.asteriskjava.fastagi.command.StreamFileCommand;
 import org.asteriskjava.fastagi.command.VerboseCommand;
 import org.asteriskjava.manager.action.PlayDtmfAction;
 
-import com.astgspeech.InfiniteLoop;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.AudioRequest;
 import com.google.cloud.speech.v1.InitialRecognizeRequest;
@@ -47,7 +46,7 @@ import io.grpc.stub.StreamObserver;
  * Hello world!
  *
  */
-public class TestRecognize {
+public class Recognize {
 
 	private static LineNumberReader in = new LineNumberReader(new InputStreamReader(System.in));
 
@@ -61,7 +60,7 @@ public class TestRecognize {
 
 	private static final List<String> OAUTH2_SCOPES = Arrays.asList("https://www.googleapis.com/auth/cloud-platform");
 
-	public TestRecognize() throws IOException {
+	public Recognize() throws IOException {
 		String host = "speech.googleapis.com";
 		Integer port = 443;
 		this.samplingRate = 8000;
@@ -181,7 +180,7 @@ public class TestRecognize {
 			}
 		};
 		//execute( new SayDigitsCommand("1") );
-		execute( new StreamFileCommand("beep") );
+		//execute( new StreamFileCommand("beep") );
 		
 		StreamObserver<RecognizeRequest> requestObserver = stub.recognize(responseObserver);
 		try {
@@ -288,7 +287,7 @@ public class TestRecognize {
 			//readMedia();
 				
 
-			TestRecognize client = new TestRecognize();
+			Recognize client = new Recognize();
 			//execute( new SayDigitsCommand("12354") );
 			try {
 				client.recognize();
