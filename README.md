@@ -7,7 +7,9 @@ https://cloud.google.com/speech/docs/
 
 This project use eagi to send the audio throw java grpc to google and return the text.
 
+```sh
 yum install apache-maven
+```
 
 You have to follow the instructions from https://github.com/GoogleCloudPlatform/java-docs-samples/tree/master/speech/grpc
 
@@ -17,7 +19,7 @@ Service account key > New service account`.
 Create a new service account, and download the json credentials file.
 
 Then, set
-the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to point to your
+the `GOOGLE_APPLICATION_CREDENTIALS` /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh variable to point to your
 downloaded service account credentials before running this example:
 
     export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/credentials-key.json
@@ -25,10 +27,16 @@ downloaded service account credentials before running this example:
 Download Code:
 cd /var/lib/asterisk/agi-bin
 git clone https://github.com/lbolanos/ast-gspeech.git
-	
+
+Write your service in /var/lib/asterisk/agi-bin/ast-gspeech/src/main/java/com/astgspeech/services
+
+
 Then, build the program:
 
 ```sh
+chmod 755 /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh
+dos2unix /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh
+cd /var/lib/asterisk/agi-bin/ast-gspeech/
 $ mvn package
 ```
 
@@ -44,6 +52,7 @@ exten => 126,n,Playback(hello-world)
 exten => 126,n,Hangup()
 
 Output:
+```
 Received response: results {
   alternatives {
     transcript: "el d\303\255a de entrega de notas recibida la orden particular quienes hayan aprobado todas las materias iespien a paz y salvo"
@@ -68,6 +77,6 @@ INFO: Transport io.grpc.netty.NettyClientTransport@457b01e5(speech.googleapis.co
     -- <SIP/6001-00000003> Playing 'hello-world.gsm' (language 'en')
     -- Executing [126@from-internal:6] Hangup("SIP/6001-00000003", "") in new stack
   == Spawn extension (from-internal, 126, 6) exited non-zero on 'SIP/6001-00000003'
-
+```
 
 

@@ -1,7 +1,5 @@
 package com.astgspeech.services;
 
-import java.io.IOException;
-
 import org.asteriskjava.fastagi.AgiChannel;
 import org.asteriskjava.fastagi.AgiException;
 import org.asteriskjava.fastagi.AgiRequest;
@@ -12,10 +10,6 @@ import com.google.cloud.speech.v1.RecognizeResponse.EndpointerEvent;
 import com.google.cloud.speech.v1.SpeechRecognitionResult;
 
 public class HelloWorld extends BaseAgiRecoScript {
-
-	public HelloWorld() throws IOException {
-		super();
-	}
 
 	@Override
 	public void service(AgiRequest request, AgiChannel channel) throws AgiException {

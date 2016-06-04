@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 import org.asteriskjava.fastagi.AgiChannel;
 import org.asteriskjava.fastagi.AgiException;
 import org.asteriskjava.fastagi.AgiRequest;
-import org.asteriskjava.fastagi.command.ChannelStatusCommand;
-import org.asteriskjava.fastagi.command.SetVariableCommand;
 import org.asteriskjava.util.Log;
 import org.asteriskjava.util.LogFactory;
 
@@ -24,13 +22,13 @@ import com.astgspeech.core.BaseEAgiScript;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.AudioRequest;
 import com.google.cloud.speech.v1.InitialRecognizeRequest;
+import com.google.cloud.speech.v1.InitialRecognizeRequest.AudioEncoding;
 import com.google.cloud.speech.v1.RecognizeRequest;
 import com.google.cloud.speech.v1.RecognizeResponse;
 import com.google.cloud.speech.v1.RecognizeResponse.EndpointerEvent;
 import com.google.cloud.speech.v1.SpeechGrpc;
 import com.google.cloud.speech.v1.SpeechRecognitionAlternative;
 import com.google.cloud.speech.v1.SpeechRecognitionResult;
-import com.google.cloud.speech.v1.InitialRecognizeRequest.AudioEncoding;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.TextFormat;
 
@@ -62,11 +60,17 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 	
 	public abstract void onCompleted(); 
 	
-	public BaseAgiRecoScript() throws IOException {
+	public BaseAgiRecoScript() {
+		super();
 		String host = "speech.googleapis.com";
 		Integer port = 443;
 		this.samplingRate = 8000;
-		GoogleCredentials creds = GoogleCredentials.getApplicationDefault();
+		GoogleCredentials creds;
+		try {
+			creds = GoogleCredentials.getApplicationDefault();
+		} catch (IOException e) {
+			throw new RuntimeException ( e );
+		}
 		creds = creds.createScoped(OAUTH2_SCOPES);
 		channel = NettyChannelBuilder.forAddress(host, port).negotiationType(NegotiationType.TLS)
 				.intercept(new ClientAuthInterceptor(creds, Executors.newSingleThreadExecutor())).build();
