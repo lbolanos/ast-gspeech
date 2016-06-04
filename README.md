@@ -8,6 +8,7 @@ https://cloud.google.com/speech/docs/
 This project use eagi to send the audio throw java grpc to google and return the text.
 
 ```sh
+wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
 yum install apache-maven
 ```
 
