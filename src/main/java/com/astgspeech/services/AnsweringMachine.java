@@ -3,13 +3,18 @@ package com.astgspeech.services;
 import org.asteriskjava.fastagi.AgiChannel;
 import org.asteriskjava.fastagi.AgiException;
 import org.asteriskjava.fastagi.AgiRequest;
+import org.asteriskjava.util.Log;
+import org.asteriskjava.util.LogFactory;
 
+import java.text.Normalizer;
 import com.astgspeech.BaseAgiRecoScript;
 import com.google.cloud.speech.v1.RecognizeResponse;
 import com.google.cloud.speech.v1.RecognizeResponse.EndpointerEvent;
 import com.google.cloud.speech.v1.SpeechRecognitionResult;
 
 public class AnsweringMachine extends BaseAgiRecoScript {
+	
+	private final Log logger = LogFactory.getLog(AnsweringMachine.class);
 	
 	private String lastTranscript = "";
 
@@ -56,13 +61,22 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 				lastTranscript = transcript;
 			}
 			setVariable( "transcript" ,transcript );
-			if( transcript.contains("mensaje después del tono" ) ||
-					transcript.contains("buzón" ) ) {
+			
+			String tol = Normalizer.normalize(transcript, Normalizer.Form.NFD).toLowerCase()
+				.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+			logger.info("onNext:" + tol + " confidence:" + confidence );
+			if( confidence > 0.6 && 
+				( tol.contains("mensaje despues del tono" ) ||
+					tol.contains( "lleno y no puede recibir" ) ||
+					tol.contains( "buzon" ) 
+					) ){
 				setVariable( "MACHINE" ,"TRUE" );
 				hangup();				
 				return false;
 			}
-			if( transcript.contains("aló" ) ) {
+			//logger.info("onNext: not found" );
+			if( confidence > 0.6 && 
+				( tol.contains("alo" ) ) ){
 				setVariable( "MACHINE" ,"FALSE" );
 				return false;
 			}

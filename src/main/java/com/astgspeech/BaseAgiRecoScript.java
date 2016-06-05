@@ -104,21 +104,24 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 				if( endpoint != null ) {
 					boolean continueRet = script.onEvent( endpoint );
 					if( !continueRet ) {
+						logger.info("onEvent Terminate Loop:");
 						infinite.setInfinite( false );
 						return;
 					}
 				}
 				for (SpeechRecognitionResult speechRecognitionResult : response.getResultsList()) {
 					boolean isFinal = speechRecognitionResult.getIsFinal(); 
+					float stability = speechRecognitionResult.getStability();
 					for (SpeechRecognitionAlternative speechRecognitionAlternative : speechRecognitionResult.getAlternativesList()) {
 						String transcript = speechRecognitionAlternative.getTranscript();
 						boolean continueRet = true;
 						if( isFinal ) {
-							continueRet = script.onFinal( transcript, speechRecognitionAlternative.getConfidence(), speechRecognitionResult, response );
+							continueRet = script.onFinal( transcript, stability, speechRecognitionResult, response );
 						} else {
-							continueRet = script.onNext( transcript, speechRecognitionAlternative.getConfidence(), speechRecognitionResult, response );
+							continueRet = script.onNext( transcript, stability, speechRecognitionResult, response );
 						}
 						if( !continueRet ) {
+							logger.info("Terminate Loop: isFinal:" + isFinal );
 							infinite.setInfinite( false );
 							break;
 						}
@@ -180,7 +183,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 					if( available >= 3200 ) {
 						in.readFully(buffer);
 						bytesRead = buffer.length;
-						int delay = 0;
+						int delay = -3;
 						now = new Date();
 						long timeNow = now.getTime();
 						long elapsed = timeNow - before.getTime();					
