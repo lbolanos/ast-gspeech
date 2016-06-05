@@ -184,11 +184,11 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 						now = new Date();
 						long timeNow = now.getTime();
 						long elapsed = timeNow - before.getTime();					
-						logger.debug("Sent " + bytesRead + " elapsed:" + elapsed + " msec:" + timeNow );
+						logger.debug("available:" + available + " elapsed:" + elapsed + " msec:" + timeNow );
 						before = now;
 						if( elapsed < 180 ) {
 							//continue;
-							delay = 10;
+							//delay = 10;
 						}
 						
 						totalBytes += bytesRead;

@@ -56,7 +56,8 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 				lastTranscript = transcript;
 			}
 			setVariable( "transcript" ,transcript );
-			if( transcript.contains("mensaje después del tono" ) ) {
+			if( transcript.contains("mensaje después del tono" ) ||
+					transcript.contains("buzón" ) ) {
 				setVariable( "MACHINE" ,"TRUE" );
 				hangup();				
 				return false;
