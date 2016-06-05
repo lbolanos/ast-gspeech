@@ -42,15 +42,15 @@ $ mvn package
 ```
 
 Modify /etc/asterisk/extensions.conf
-
+```
 Example 1:
 exten => 127,1,eagi(./ast-gspeech/bin/run.sh,com.astgspeech.services.HelloWorld)
 exten => 127,n,Verbose(1,The text you just said is: ${transcript})
 exten => 127,n,Playback(hello-world)
 exten => 127,n,Hangup()
+```
 
-
-
+```
 Example 2:
 exten => 126,1,Answer()
 exten => 126,n,Playback(vm-savemessage)
@@ -59,7 +59,7 @@ exten => 126,n,eagi(./ast-gspeech/bin/run.sh)
 exten => 126,n,Verbose(1,The text you just said is: ${transcript})
 exten => 126,n,Playback(hello-world)
 exten => 126,n,Hangup()
-
+```
 Output:
 ```
 Received response: results {

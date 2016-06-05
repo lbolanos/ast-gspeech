@@ -52,9 +52,9 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 	public boolean onNext(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
 			RecognizeResponse response) {
 		try{
-		if( confidence > 0.8 ) {
-			lastTranscript = transcript;
-		}
+			if( confidence > 0.8 ) {
+				lastTranscript = transcript;
+			}
 			setVariable( "transcript" ,transcript );
 			if( transcript.contains("mensaje después del tono" ) ) {
 				setVariable( "MACHINE" ,"TRUE" );

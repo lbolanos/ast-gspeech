@@ -132,6 +132,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 				logger.error("recognize failed: {0}" + status);
 				finishLatch.countDown();
 				script.onError(error);
+				infinite.setInfinite( false );
 			}
 
 			@Override
@@ -139,6 +140,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 				logger.info("recognize completed.");
 				finishLatch.countDown();
 				script.onCompleted();
+				infinite.setInfinite( false );
 			}
 		};
 		//execute( new SayDigitsCommand("1") );
@@ -178,7 +180,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 					if( available >= 3200 ) {
 						in.readFully(buffer);
 						bytesRead = buffer.length;
-						int delay = 3;
+						int delay = 0;
 						now = new Date();
 						long timeNow = now.getTime();
 						long elapsed = timeNow - before.getTime();					
@@ -186,7 +188,7 @@ public abstract class BaseAgiRecoScript extends BaseEAgiScript   {
 						before = now;
 						if( elapsed < 180 ) {
 							//continue;
-							delay = 20;
+							delay = 10;
 						}
 						
 						totalBytes += bytesRead;
