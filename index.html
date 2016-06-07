@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Ast-gspeech by lbolanos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Ast-gspeech</h1>
+      <h2 class="project-tagline">Asterisk Streaming Connection with google speech API</h2>
+      <a href="https://github.com/lbolanos/ast-gspeech" class="btn">View on GitHub</a>
+      <a href="https://github.com/lbolanos/ast-gspeech/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/lbolanos/ast-gspeech/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="ast-gspeech" class="anchor" href="#ast-gspeech" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ast-gspeech</h1>
+
+<h2>
+<a id="asterisk-connection-with-google-cloud-speech-api" class="anchor" href="#asterisk-connection-with-google-cloud-speech-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Asterisk Connection with Google Cloud Speech API</h2>
+
+<p>You have to follow the instructions to get google speech api working</p>
+
+<p><a href="https://cloud.google.com/speech/docs/">https://cloud.google.com/speech/docs/</a></p>
+
+<p>This project use eagi to send the audio throw java grpc to google and return the text.</p>
+
+<div class="highlight highlight-source-shell"><pre>wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+yum install apache-maven</pre></div>
+
+<p>You have to follow the instructions from <a href="https://github.com/GoogleCloudPlatform/java-docs-samples/tree/master/speech/grpc">https://github.com/GoogleCloudPlatform/java-docs-samples/tree/master/speech/grpc</a></p>
+
+<p>Visit the <a href="https://console.developers.google.com">Cloud Console</a>, and navigate to:
+<code>API Manager &gt; Credentials &gt; Create credentials &gt;
+Service account key &gt; New service account</code>.
+Create a new service account, and download the json credentials file.</p>
+
+<p>Then, set
+the <code>GOOGLE_APPLICATION_CREDENTIALS</code> /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh variable to point to your
+downloaded service account credentials before running this example:</p>
+
+<pre><code>export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/credentials-key.json
+</code></pre>
+
+<p>Download Code:
+cd /var/lib/asterisk/agi-bin
+git clone <a href="https://github.com/lbolanos/ast-gspeech.git">https://github.com/lbolanos/ast-gspeech.git</a></p>
+
+<p>Write your service in /var/lib/asterisk/agi-bin/ast-gspeech/src/main/java/com/astgspeech/services</p>
+
+<p>Then, build the program:</p>
+
+<div class="highlight highlight-source-shell"><pre>chmod 755 /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh
+dos2unix /var/lib/asterisk/agi-bin/ast-gspeech/bin/run.sh
+<span class="pl-c1">cd</span> /var/lib/asterisk/agi-bin/ast-gspeech/
+$ mvn package</pre></div>
+
+<h2>
+<a id="helloworld" class="anchor" href="#helloworld" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HelloWorld</h2>
+
+<pre><code>package com.astgspeech.services;
+
+import org.asteriskjava.fastagi.AgiChannel;
+import org.asteriskjava.fastagi.AgiException;
+import org.asteriskjava.fastagi.AgiRequest;
+
+import com.astgspeech.BaseAgiRecoScript;
+import com.google.cloud.speech.v1.RecognizeResponse;
+import com.google.cloud.speech.v1.RecognizeResponse.EndpointerEvent;
+import com.google.cloud.speech.v1.SpeechRecognitionResult;
+
+public class HelloWorld extends BaseAgiRecoScript {
+
+    private String lastTranscript = "";
+
+    @Override
+    public void service(AgiRequest request, AgiChannel channel) throws AgiException {
+        answer();
+        streamFile("beep");
+        /*
+        // ...say hello...
+        streamFile("welcome");
+        streamFile("tt-monkeys");
+        // ...and hangup.
+        hangup();
+        */
+        super.service(request, channel);
+    }
+
+    @Override
+    public void onError(Throwable error) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onCompleted() {
+        // TODO Auto-generated method stub      
+    }
+
+    @Override
+    public boolean onEvent(EndpointerEvent endpoint) {
+        switch( endpoint.getNumber() ) {
+            case EndpointerEvent.END_OF_SPEECH_VALUE:
+                if( lastTranscript.length() &gt; 30 ) {
+                    return false;
+                }
+                return true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onNext(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
+            RecognizeResponse response) {
+        if( confidence &gt; 0.8 ) {
+            lastTranscript = transcript;
+        }
+        try {
+            setVariable( "transcript" ,transcript );
+        } catch (AgiException e) {
+            e.printStackTrace(System.err);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onFinal(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
+            RecognizeResponse response) {
+        try {
+            setVariable( "transcript" ,transcript );
+        } catch (AgiException e) {
+            e.printStackTrace(System.err);
+        }
+        return false;
+    }
+
+
+
+}
+</code></pre>
+
+<h2>
+<a id="answeringmachine" class="anchor" href="#answeringmachine" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>AnsweringMachine</h2>
+
+<pre><code>package com.astgspeech.services;
+
+import org.asteriskjava.fastagi.AgiChannel;
+import org.asteriskjava.fastagi.AgiException;
+import org.asteriskjava.fastagi.AgiRequest;
+import org.asteriskjava.util.Log;
+import org.asteriskjava.util.LogFactory;
+
+import java.text.Normalizer;
+import com.astgspeech.BaseAgiRecoScript;
+import com.google.cloud.speech.v1.RecognizeResponse;
+import com.google.cloud.speech.v1.RecognizeResponse.EndpointerEvent;
+import com.google.cloud.speech.v1.SpeechRecognitionResult;
+
+public class AnsweringMachine extends BaseAgiRecoScript {
+
+    private final Log logger = LogFactory.getLog(AnsweringMachine.class);
+
+    private String lastTranscript = "";
+
+    @Override
+    public void service(AgiRequest request, AgiChannel channel) throws AgiException {       
+        /*
+        // ...say hello...
+        streamFile("welcome");
+        streamFile("tt-monkeys");
+        // ...and hangup.
+        hangup();
+        */
+        super.service(request, channel);
+    }
+
+    @Override
+    public void onError(Throwable error) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onCompleted() {
+        // TODO Auto-generated method stub      
+    }
+
+    @Override
+    public boolean onEvent(EndpointerEvent endpoint) {
+        switch( endpoint.getNumber() ) {
+            case EndpointerEvent.END_OF_SPEECH_VALUE:
+                if( lastTranscript.length() &gt; 30 ) {
+                    return false;
+                }
+                return true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onNext(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
+            RecognizeResponse response) {
+        try{
+            if( confidence &gt; 0.8 ) {
+                lastTranscript = transcript;
+            }
+            setVariable( "transcript" ,transcript );
+
+            String tol = Normalizer.normalize(transcript, Normalizer.Form.NFD).toLowerCase()
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+            logger.info("onNext:" + tol + " confidence:" + confidence );
+            if( confidence &gt; 0.6 &amp;&amp; 
+                ( tol.contains("grabe su mensaje" )  ||
+                    tol.contains("mensaje despues del tono" )  ||
+                    tol.contains( "lleno y no puede recibir" ) ||
+                    tol.contains( "buzon" ) 
+                    ) ) {
+                setVariable( "MACHINE" ,"TRUE" );
+                hangup();               
+                return false;
+            }
+            //logger.info("onNext: not found" );
+            if( confidence &gt; 0.6 &amp;&amp; 
+                ( tol.contains("alo" ) ) ){
+                setVariable( "MACHINE" ,"FALSE" );
+                return false;
+            }
+        } catch (AgiException e) {
+            e.printStackTrace(System.err);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onFinal(String transcript, float confidence, SpeechRecognitionResult speechRecognitionResult,
+            RecognizeResponse response) {
+        try {
+            setVariable( "transcript" ,transcript );
+        } catch (AgiException e) {
+            e.printStackTrace(System.err);
+        }
+        return false;
+    }
+
+
+
+}
+
+</code></pre>
+
+<p>Modify /etc/asterisk/extensions.conf</p>
+
+<pre><code>Example 1:
+exten =&gt; 127,1,eagi(./ast-gspeech/bin/run.sh,com.astgspeech.services.HelloWorld)
+exten =&gt; 127,n,Verbose(1,The text you just said is: ${transcript})
+exten =&gt; 127,n,Playback(hello-world)
+exten =&gt; 127,n,Hangup()
+</code></pre>
+
+<pre><code>Example 2:
+exten =&gt; 126,1,Answer()
+exten =&gt; 126,n,Playback(vm-savemessage)
+exten =&gt; 126,n,eagi(./ast-gspeech/bin/run.sh)
+;exten =&gt; 126,n,Festival(${transcript})
+exten =&gt; 126,n,Verbose(1,The text you just said is: ${transcript})
+exten =&gt; 126,n,Playback(hello-world)
+exten =&gt; 126,n,Hangup()
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Received response: results {
+  alternatives {
+    transcript: "el d\303\255a de entrega de notas recibida la orden particular quienes hayan aprobado todas las materias iespien a paz y salvo"
+    confidence: 0.80237895
+  }
+  is_final: true
+}
+
+SET VARIABLE "transcript" "el día de entrega de notas recibida la orden particular quienes hayan aprobado todas las materias y estén a paz y salvo" returned:200 result=1
+Sent 332800 bytes from audio file:
+Received response: endpoint: END_OF_AUDIO
+
+recognize completed.
+Jun 02, 2016 6:25:06 PM io.grpc.internal.TransportSet$TransportListener transportShutdown
+INFO: Transport io.grpc.netty.NettyClientTransport@457b01e5(speech.googleapis.com/216.58.218.10:443) for speech.googleapis.com/216.58.218.10:443 is being shutdown
+Jun 02, 2016 6:25:06 PM io.grpc.internal.TransportSet$TransportListener transportTerminated
+INFO: Transport io.grpc.netty.NettyClientTransport@457b01e5(speech.googleapis.com/216.58.218.10:443) for speech.googleapis.com/216.58.218.10:443 is terminated
+    -- &lt;SIP/6001-00000003&gt;AGI Script ./astexample/bin/run.sh completed, returning 0
+    -- Executing [126@from-internal:4] Verbose("SIP/6001-00000003", "1,The text you just said is: el día de entrega de notas recibida la orden particular quienes hayan aprobado todas las materias y estén a paz y salvo") in new stack
+ The text you just said is: el día de entrega de notas recibida la orden particular quienes hayan aprobado todas las materias y estén a paz y salvo
+    -- Executing [126@from-internal:5] Playback("SIP/6001-00000003", "hello-world") in new stack
+    -- &lt;SIP/6001-00000003&gt; Playing 'hello-world.gsm' (language 'en')
+    -- Executing [126@from-internal:6] Hangup("SIP/6001-00000003", "") in new stack
+  == Spawn extension (from-internal, 126, 6) exited non-zero on 'SIP/6001-00000003'
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/lbolanos/ast-gspeech">Ast-gspeech</a> is maintained by <a href="https://github.com/lbolanos">lbolanos</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
