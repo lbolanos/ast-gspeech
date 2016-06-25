@@ -15,7 +15,6 @@ import org.asteriskjava.fastagi.CompositeMappingStrategy;
 import org.asteriskjava.fastagi.MappingStrategy;
 import org.asteriskjava.fastagi.ResourceBundleMappingStrategy;
 import org.asteriskjava.fastagi.StaticMappingStrategy;
-import org.asteriskjava.fastagi.internal.AgiConnectionHandler;
 import org.asteriskjava.util.Log;
 import org.asteriskjava.util.LogFactory;
 import org.asteriskjava.util.ReflectionUtil;
