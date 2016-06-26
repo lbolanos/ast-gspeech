@@ -31,7 +31,8 @@ public class HelloAgiScript extends BaseAgiScript {
 		try {
 			fop = new FileOutputStream(file);        
 			while( true ) {
-        sendCommand(new GetAudioSample());
+				logger.info("GetAudioSample:"  );
+				sendCommand(new GetAudioSample());
 		        AgiReply lastReply = getLastReply();
 		        String firstLine = lastReply.getFirstLine();
 		        byte[] buffer = Base64.decodeBase64(firstLine);

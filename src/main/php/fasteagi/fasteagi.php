@@ -1,6 +1,7 @@
 #!/usr/bin/php
 <?php
 $fd3 = fopen('php://fd/3', 'r');
+//$fd3 = dio_open ( "/proc/self/fd/3",O_RDONLY );
 
 function getParameter( &$param, $name, $line ) {
 	$arg2="agi_" . $name;
@@ -12,7 +13,14 @@ function getParameter( &$param, $name, $line ) {
 
 function getB64AudioSample() {
 	global $fd3;
-	$buff = stream_get_contents($fd3);
+	$then = microtime(true);
+	fwrite(STDERR, "fde3=$fd3 size=$length elapsed:$elapsed" );
+	//$buff = fgets( $fd3, 3200 );
+	$buff = fread( $fd3, 3200 );
+	//$buff = dio_read ( $fd3, 3200 );
+	$elapsed = microtime(true) - $then;
+	$length = strlen($buff);
+	fwrite(STDERR, "size=$length elapsed:$elapsed" );
 	//$buff = pack ("c*", 1, 2, 3);
 	return base64_encode( $buff  );
 }
@@ -29,13 +37,13 @@ while($f = fgets(STDIN)){
 	getParameter( $serverUrl, "arg_2", $f );
 }
 $lines[] = "agi_network_script: $script\n";
-echo "server:$serverUrl";
+fwrite(STDERR, "server:$serverUrl" );
 $fp = stream_socket_client($serverUrl, $errno, $errstr);
 if (!$fp) {
 	fwrite( STDERR, "ERROR: $errno - $errstr\n");
 } else {
 	foreach ($lines as $line ) {
-		echo $line;
+		fwrite(STDERR, $line );
 		fwrite($fp, $line );
 	}
 	//fwrite($fp, "\n");
