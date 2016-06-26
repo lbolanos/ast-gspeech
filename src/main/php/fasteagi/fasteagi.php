@@ -1,5 +1,6 @@
+#!/usr/bin/php
 <?php
-//$fd3 = fopen('php://fd/3', 'r');
+$fd3 = fopen('php://fd/3', 'r');
 
 function getParameter( &$param, $name, $line ) {
 	$arg2="agi_" . $name;
@@ -10,9 +11,9 @@ function getParameter( &$param, $name, $line ) {
 }
 
 function getB64AudioSample() {
-	//global $fd3;
-	//$buff = stream_get_contents($fd3);
-	$buff = pack ("c*", 1, 2, 3);
+	global $fd3;
+	$buff = stream_get_contents($fd3);
+	//$buff = pack ("c*", 1, 2, 3);
 	return base64_encode( $buff  );
 }
 
