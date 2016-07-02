@@ -31,7 +31,7 @@ sub getB64AudioSample {
 	#global $fd3;
 	my $buffer;
 	my $then = gettimeofday();
-	#print STDERR "fde3=$fd3";
+	#print STDERR "audio_fh=$audio_fh";
 	my $bytes_read = $audio_fh->read( $buffer, 3200 );
 	#$buffer = fgets( $fd3, 3200 );
 	#$buffer = fread( $fd3, 3200 );
@@ -55,6 +55,25 @@ while( <STDIN> ){
 push(@coins, "agi_network_script: $script\n" );
 print STDERR $script;
 print STDERR $serverUrl;
+
+
+# Playback beep
+print "STREAM FILE beep \"#\"\n"; $result = <STDIN>;
+
+# Record 5 seconds of audio at 8,000 samples/second (uses 16 bit integers)
+#    5 seconds x 8000 samples/second x ( 16 bits / 8bits/byte ) = 80000 bytes
+#my $bytes_read = $audio_fh->read( $buffer, 80000 );
+#$audio_fh->close();
+
+# Playback beep
+#print "STREAM FILE beep \"#\"\n"; $result = <STDIN>;
+
+# Write the raw audio to a file for later analysis
+#my $fh;
+#open( $fh, ">/tmp/recording.raw" );
+#print $fh $buffer;
+#close( $fh );
+
 
 @parsedUrl = split(/:\/\/|:/, $serverUrl );
 print STDERR join(", ", @parsedUrl);
@@ -85,7 +104,7 @@ while ($line = <$socket>) {
 	if( $pos >= 0 ) {
 		$buff = getB64AudioSample( ) . "\n";
 		$socket->send( $buff );
-		print STDERR "<=" . $line . "=>" . $buff;
+		#print STDERR "<=" . $line . "=>" . $buff;
 	} else {
 		print STDOUT $line;
 		$f = <STDIN>;

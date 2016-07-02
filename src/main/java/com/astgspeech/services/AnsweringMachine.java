@@ -66,7 +66,9 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 				.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 			logger.info("onNext:" + tol + " confidence:" + confidence );
 			if( confidence > 0.6 && 
-				( tol.contains("mensaje despues del tono" ) ||
+				( tol.contains("mensaje" )  					||
+					tol.contains("grabe su mensaje" )  			||
+					tol.contains("mensaje despues del tono" )  	||
 					tol.contains( "lleno y no puede recibir" ) ||
 					tol.contains( "buzon" ) 
 					) ){
@@ -76,7 +78,8 @@ public class AnsweringMachine extends BaseAgiRecoScript {
 			}
 			//logger.info("onNext: not found" );
 			if( confidence > 0.6 && 
-				( tol.contains("alo" ) ) ){
+				( tol.contains("alo" ) ||
+					tol.contains("a lo" )) ){
 				setVariable( "MACHINE" ,"FALSE" );
 				return false;
 			}

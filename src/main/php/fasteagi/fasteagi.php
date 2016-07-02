@@ -38,6 +38,11 @@ while($f = fgets(STDIN)){
 }
 $lines[] = "agi_network_script: $script\n";
 fwrite(STDERR, "server:$serverUrl" );
+
+fwrite(STDOUT, "STREAM FILE beep \"#\"\n");
+$result = fgets(STDIN);
+
+
 $fp = stream_socket_client($serverUrl, $errno, $errstr);
 if (!$fp) {
 	fwrite( STDERR, "ERROR: $errno - $errstr\n");
